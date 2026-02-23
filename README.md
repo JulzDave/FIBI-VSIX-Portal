@@ -1,4 +1,4 @@
-# FIBI VS Code Extension Portal (מתף)
+# FIBI VS Code Extension Portal
 
 A lightweight, single-page application that queries the official Visual Studio Marketplace, allowing users to search for extensions, view their version history, and directly download the `.vsix` binary files.
 
