@@ -221,12 +221,30 @@ components:
           type: integer
           format: int32
           description: |
-            Bitwise mask determining the depth of data returned in the response. Common combinations:
-            - **133**: Minimal data
-            - **359**: Include all versions (Standard for Version History)
-            - **870**: Common Search Mask (Includes Files, Attributes, Taxonomy)
-            - **914**: Standard Search (Broadest metadata inclusion)
+            **Bitwise Flags for Extension Metadata**
+            This integer is a bitmask used to specify exactly which metadata the server should return. Instead of sending multiple boolean fields, you send a single integer representing the sum of your desired options.
 
+            **Available Flags (Powers of 2):**
+            * **1**: Include Versions
+            * **2**: Include Files (the CDN links)
+            * **4**: Include Category and Tags
+            * **16**: Include Version Properties
+            * **32**: Exclude Non-Validated Extensions
+            * **64**: Include Installation Targets
+            * **128**: Include Asset URIs
+            * **256**: Include Statistics (Downloads, Ratings)
+            * **512**: Include Latest Version Only
+
+            **How it Works:**
+            To request multiple data points, add their values together (using a Bitwise OR operation). For example, to get Files (2) + Categories (4) + Statistics (256), you would send `262`.
+
+            **Common Combinations:**
+            * **133**: Minimal data
+            * **359**: Include all versions (Standard for Version History queries)
+            * **870**: Common Search Mask (Combines 512 + 256 + 64 + 32 + 4 + 2)
+            * **914**: Standard Broad Search (Includes maximum metadata)
+
+            *Note: While you send these flags as an integer in the request body, the API often returns the `Extension.flags` property as a comma-separated string in the response (e.g., "validated, public").*
     SearchRequest:
       description: Request schema for keyword or platform searches.
       allOf:
