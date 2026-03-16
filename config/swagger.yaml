@@ -147,19 +147,10 @@ components:
       content:
         application/json:
           schema:
-            type: object
-            properties:
-              results:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    extensions:
-                      type: array
-                      items:
-                        $ref: '#/components/schemas/Extension'
+            $ref: '#/components/schemas/QueryResponseBody'
 
   schemas:
+    # --- Request Schemas ---
     QueryRequestBase:
       type: object
       properties:
@@ -211,47 +202,167 @@ components:
                         filterType: { type: integer, default: 7, description: "7 = Fully Qualified Name" }
                         value: { type: string, description: "Format: publisher.extensionName" }
 
+    # --- Response Schemas ---
+    QueryResponseBody:
+      type: object
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Result'
+
+    Result:
+      type: object
+      properties:
+        extensions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Extension'
+        pagingToken:
+          type: string
+          nullable: true
+        resultMetadata:
+          type: array
+          items:
+            $ref: '#/components/schemas/ResultMetadatum'
+
     Extension:
       type: object
       properties:
-        extensionId: { type: string, format: uuid }
-        extensionName: { type: string }
-        displayName: { type: string }
-        shortDescription: { type: string }
         publisher:
-          type: object
-          properties:
-            publisherId: { type: string, format: uuid }
-            publisherName: { type: string }
-            displayName: { type: string }
+          $ref: '#/components/schemas/Publisher'
+        extensionId:
+          type: string
+          format: uuid
+        extensionName:
+          type: string
+        displayName:
+          type: string
+        flags:
+          type: string
+        lastUpdated:
+          type: string
+          format: date-time
+        publishedDate:
+          type: string
+          format: date-time
+        releaseDate:
+          type: string
+          format: date-time
+        shortDescription:
+          type: string
         versions:
           type: array
           items:
-            $ref: '#/components/schemas/ExtensionVersion'
+            $ref: '#/components/schemas/Version'
+        categories:
+          type: array
+          items:
+            type: string
+        tags:
+          type: array
+          items:
+            type: string
         statistics:
           type: array
           items:
-            type: object
-            properties:
-              statisticName: { type: string }
-              value: { type: number }
+            $ref: '#/components/schemas/Statistic'
+        installationTargets:
+          type: array
+          items:
+            $ref: '#/components/schemas/InstallationTarget'
+        deploymentType:
+          type: integer
 
-    ExtensionVersion:
+    InstallationTarget:
       type: object
       properties:
-        version: { type: string }
-        lastUpdated: { type: string, format: date-time }
+        target:
+          type: string
+        targetVersion:
+          type: string
+
+    Publisher:
+      type: object
+      properties:
+        publisherId:
+          type: string
+          format: uuid
+        publisherName:
+          type: string
+        displayName:
+          type: string
+        flags:
+          type: string
+        domain:
+          type: string
+        isDomainVerified:
+          type: boolean
+
+    Statistic:
+      type: object
+      properties:
+        statisticName:
+          type: string
+        value:
+          type: number
+
+    Version:
+      type: object
+      properties:
+        version:
+          type: string
+        flags:
+          type: string
+        lastUpdated:
+          type: string
+          format: date-time
         files:
           type: array
           items:
-            type: object
-            properties:
-              assetType: { type: string }
-              source: { type: string, format: uri }
+            $ref: '#/components/schemas/File'
         properties:
           type: array
           items:
-            type: object
-            properties:
-              key: { type: string }
-              value: { type: string }
+            $ref: '#/components/schemas/Property'
+        assetUri:
+          type: string
+          format: uri
+        fallbackAssetUri:
+          type: string
+          format: uri
+
+    File:
+      type: object
+      properties:
+        assetType:
+          type: string
+        source:
+          type: string
+          format: uri
+
+    Property:
+      type: object
+      properties:
+        key:
+          type: string
+        value:
+          type: string
+
+    ResultMetadatum:
+      type: object
+      properties:
+        metadataType:
+          type: string
+        metadataItems:
+          type: array
+          items:
+            $ref: '#/components/schemas/MetadataItem'
+
+    MetadataItem:
+      type: object
+      properties:
+        name:
+          type: string
+        count:
+          type: integer
