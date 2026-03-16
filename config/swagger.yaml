@@ -1,0 +1,257 @@
+openapi: 3.0.0
+info:
+  title: VS Code Marketplace Internal API
+  version: 1.0.0
+  description: Unified specification for extension search, version history, and VSIX downloads.
+
+servers:
+  - url: https://marketplace.visualstudio.com
+    description: Main Marketplace Metadata Server
+
+paths:
+  /_apis/public/gallery/extensionquery:
+    post:
+      operationId: queryExtensionGallery
+      summary: Extension Query Service
+      description: |
+        A multi-purpose endpoint for the VS Code Marketplace. 
+        - **Search Mode:** Performs broad searches (e.g., by keyword or platform).
+        - **Version History Mode:** Retrieves specific extension metadata including all available versions.
+      parameters:
+        - in: query
+          name: api-version
+          required: true
+          schema:
+            type: string
+            default: "3.0-preview.1"
+          description: Required API version parameter.
+        - in: header
+          name: Accept
+          required: false
+          schema:
+            type: string
+            default: "application/json;api-version=3.0-preview.1"
+          description: Optional, but good practice to include.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - $ref: '#/components/schemas/SearchRequest'
+                - $ref: '#/components/schemas/VersionHistoryRequest'
+            examples:
+              SearchExample:
+                summary: Initial Search (Flag 870)
+                value:
+                  filters:
+                    - criteria:
+                        - filterType: 10
+                          value: "csharpier"
+                        - filterType: 8
+                          value: "Microsoft.VisualStudio.Code"
+                      pageNumber: 1
+                      pageSize: 20
+                  assetTypes: []
+                  flags: 870
+              VersionHistoryExample:
+                summary: Fetch Full Version History (Flag 359)
+                value:
+                  filters:
+                    - criteria:
+                        - filterType: 7
+                          value: "csharpier.csharpier-vscode"
+                  assetTypes: []
+                  flags: 359
+      responses:
+        '200':
+          $ref: '#/components/responses/QueryResponse'
+
+  /_apis/public/gallery/publisher/{publisher}/extension/{extensionName}/{version}/assetbyname/Microsoft.VisualStudio.Services.VSIXPackage:
+    get:
+      summary: Download VSIX Package
+      description: |
+        Downloads the compiled binary `.vsix` extension package from the CDN.
+          - **`publisherSubdomain`** should match the `{publisher}` path parameter.
+      operationId: downloadVsix
+      servers:
+        - url: https://{publisherSubdomain}.gallery.vsassets.io
+          variables:
+            publisherSubdomain:
+              default: csharpier
+              description: >
+                Matches the {publisher} path parameter. 
+                Examples you can try: `csharpier`, `lmcarreiro`, or `vscode-icons-team`.
+      parameters:
+        - in: path
+          name: publisher
+          required: true
+          schema:
+            type: string
+          description: The publisher name (e.g., ms-python)
+          examples:
+            combination1:
+              value: "csharpier"
+              summary: CSharpier Example
+            combination2:
+              value: "lmcarreiro"
+              summary: Smart Column Example
+            combination3:
+              value: "vscode-icons-team"
+              summary: VSCode Icons Example
+        - in: path
+          name: extensionName
+          required: true
+          schema:
+            type: string
+          description: The extension ID (e.g., python)
+          examples:
+            combination1:
+              value: "csharpier-vscode"
+              summary: CSharpier Example
+            combination2:
+              value: "vscode-smart-column-indenter"
+              summary: Smart Column Example
+            combination3:
+              value: "vscode-icons"
+              summary: VSCode Icons Example
+        - in: path
+          name: version
+          required: true
+          schema:
+            type: string
+          description: Specific version string (e.g., 2023.10.1)
+          examples:
+            combination1:
+              value: "10.0.1"
+              summary: CSharpier Example
+            combination2:
+              value: "0.0.13"
+              summary: Smart Column Example
+            combination3:
+              value: "12.17.0"
+              summary: VSCode Icons Example
+      responses:
+        '200':
+          description: The binary VSIX package payload.
+          content:
+            application/zip:
+              schema:
+                type: string
+                format: binary
+
+components:
+  responses:
+    QueryResponse:
+      description: Successful query response.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              results:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    extensions:
+                      type: array
+                      items:
+                        $ref: '#/components/schemas/Extension'
+
+  schemas:
+    QueryRequestBase:
+      type: object
+      properties:
+        assetTypes:
+          type: array
+          items:
+            type: string
+          default: []
+        flags:
+          type: integer
+
+    SearchRequest:
+      description: Request schema for keyword or platform searches.
+      allOf:
+        - $ref: '#/components/schemas/QueryRequestBase'
+        - type: object
+          properties:
+            filters:
+              type: array
+              items:
+                type: object
+                properties:
+                  pageNumber: { type: integer, default: 1 }
+                  pageSize: { type: integer, default: 20 }
+                  criteria:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        filterType: { type: integer, description: "10 = search text, 8 = target platform" }
+                        value: { type: string }
+
+    VersionHistoryRequest:
+      description: Request schema for deep-diving into a specific extension.
+      allOf:
+        - $ref: '#/components/schemas/QueryRequestBase'
+        - type: object
+          properties:
+            filters:
+              type: array
+              items:
+                type: object
+                properties:
+                  criteria:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        filterType: { type: integer, default: 7, description: "7 = Fully Qualified Name" }
+                        value: { type: string, description: "Format: publisher.extensionName" }
+
+    Extension:
+      type: object
+      properties:
+        extensionId: { type: string, format: uuid }
+        extensionName: { type: string }
+        displayName: { type: string }
+        shortDescription: { type: string }
+        publisher:
+          type: object
+          properties:
+            publisherId: { type: string, format: uuid }
+            publisherName: { type: string }
+            displayName: { type: string }
+        versions:
+          type: array
+          items:
+            $ref: '#/components/schemas/ExtensionVersion'
+        statistics:
+          type: array
+          items:
+            type: object
+            properties:
+              statisticName: { type: string }
+              value: { type: number }
+
+    ExtensionVersion:
+      type: object
+      properties:
+        version: { type: string }
+        lastUpdated: { type: string, format: date-time }
+        files:
+          type: array
+          items:
+            type: object
+            properties:
+              assetType: { type: string }
+              source: { type: string, format: uri }
+        properties:
+          type: array
+          items:
+            type: object
+            properties:
+              key: { type: string }
+              value: { type: string }
