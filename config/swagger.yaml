@@ -8,6 +8,10 @@ servers:
   - url: https://marketplace.visualstudio.com
     description: Main Marketplace Metadata Server
 
+# Indicates endpoints are public by default, but provides a hook for future security layers
+security:
+  - {} 
+
 paths:
   /_apis/public/gallery/extensionquery:
     post:
@@ -32,6 +36,13 @@ paths:
             type: string
             default: "application/json;api-version=3.0-preview.1"
           description: Optional, but good practice to include.
+        - in: header
+          name: User-Agent
+          required: false
+          schema:
+            type: string
+            default: "VSCode 1.111.0 (Code)"
+          description: Highly recommended. The Marketplace can throttle or reject requests that lack a standard client User-Agent.
       requestBody:
         required: true
         content:
@@ -88,6 +99,7 @@ paths:
           required: true
           schema:
             type: string
+            pattern: '^[a-zA-Z0-9_-]+$'
           description: The publisher name (e.g., ms-python)
           examples:
             combination1:
@@ -96,14 +108,12 @@ paths:
             combination2:
               value: "lmcarreiro"
               summary: Smart Column Example
-            combination3:
-              value: "vscode-icons-team"
-              summary: VSCode Icons Example
         - in: path
           name: extensionName
           required: true
           schema:
             type: string
+            pattern: '^[a-zA-Z0-9_-]+$'
           description: The extension ID (e.g., python)
           examples:
             combination1:
@@ -112,14 +122,12 @@ paths:
             combination2:
               value: "vscode-smart-column-indenter"
               summary: Smart Column Example
-            combination3:
-              value: "vscode-icons"
-              summary: VSCode Icons Example
         - in: path
           name: version
           required: true
           schema:
             type: string
+            pattern: '^\d+\.\d+\.\d+.*$'
           description: Specific version string (e.g., 2023.10.1)
           examples:
             combination1:
@@ -128,9 +136,6 @@ paths:
             combination2:
               value: "0.0.13"
               summary: Smart Column Example
-            combination3:
-              value: "12.17.0"
-              summary: VSCode Icons Example
       responses:
         '200':
           description: The binary VSIX package payload.
@@ -161,6 +166,13 @@ components:
           default: []
         flags:
           type: integer
+          format: int32
+          description: |
+            Bitwise mask determining the depth of data returned in the response. Common combinations:
+            - **133**: Minimal data
+            - **359**: Include all versions (Standard for Version History)
+            - **870**: Common Search Mask (Includes Files, Attributes, Taxonomy)
+            - **914**: Standard Search (Broadest metadata inclusion)
 
     SearchRequest:
       description: Request schema for keyword or platform searches.
@@ -240,6 +252,7 @@ components:
           type: string
         flags:
           type: string
+          description: "Comma-separated string of returned attributes (e.g., 'validated, public'). Note: This is distinct from the integer bitmask used in the request body."
         lastUpdated:
           type: string
           format: date-time
