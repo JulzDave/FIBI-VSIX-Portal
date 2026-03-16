@@ -41,7 +41,7 @@ paths:
           required: false
           schema:
             type: string
-            default: "VSCode 1.111.0 (Code)"
+            default: "VSCode 1.85.0"
           description: Highly recommended. The Marketplace can throttle or reject requests that lack a standard client User-Agent.
       requestBody:
         required: true
@@ -77,6 +77,12 @@ paths:
       responses:
         '200':
           $ref: '#/components/responses/QueryResponse'
+        '400':
+          $ref: '#/components/responses/MarketplaceError'
+        '503':
+          $ref: '#/components/responses/RateLimitError'
+        default:
+          $ref: '#/components/responses/MarketplaceError'
 
   /_apis/public/gallery/publisher/{publisher}/extension/{extensionName}/{version}/assetbyname/Microsoft.VisualStudio.Services.VSIXPackage:
     get:
@@ -144,6 +150,14 @@ paths:
               schema:
                 type: string
                 format: binary
+        '400':
+          $ref: '#/components/responses/MarketplaceError'
+        '404':
+          $ref: '#/components/responses/MarketplaceError'
+        '503':
+          $ref: '#/components/responses/RateLimitError'
+        default:
+          $ref: '#/components/responses/MarketplaceError'
 
 components:
   responses:
@@ -153,8 +167,47 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/QueryResponseBody'
+            
+    MarketplaceError:
+      description: Standardized error response for bad requests, missing resources, or generic failures.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            $id: "1"
+            innerException: null
+            message: "Invalid api version string: \"123asd\". Api version string must be in the format: {Major}.{Minor}[-preview[.{ResourceVersion}]]."
+            typeName: "Microsoft.VisualStudio.Services.WebApi.VssInvalidApiResourceVersionException, Microsoft.VisualStudio.Services.WebApi"
+            typeKey: "VssInvalidApiResourceVersionException"
+            errorCode: 0
+            eventId: 3000
+
+    RateLimitError:
+      description: Service Unavailable. The Marketplace is throttling or rejecting the request.
 
   schemas:
+    # --- Error Schema ---
+    ErrorResponse:
+      type: object
+      description: Standard Microsoft VSS WebApi Exception payload.
+      properties:
+        $id:
+          type: string
+        innerException:
+          type: object
+          nullable: true
+        message:
+          type: string
+        typeName:
+          type: string
+        typeKey:
+          type: string
+        errorCode:
+          type: integer
+        eventId:
+          type: integer
+
     # --- Request Schemas ---
     QueryRequestBase:
       type: object
