@@ -43,6 +43,84 @@ paths:
             type: string
             default: "VSCode 1.85.0"
           description: Highly recommended. The Marketplace can throttle or reject requests that lack a standard client User-Agent.
+        - in: header
+          name: accept-encoding
+          required: false
+          schema:
+            type: string
+            example: "gzip, deflate, br, zstd"
+        - in: header
+          name: accept-language
+          required: false
+          schema:
+            type: string
+            example: "en-US"
+        - in: header
+          name: origin
+          required: false
+          schema:
+            type: string
+            example: "vscode-file://vscode-app"
+        - in: header
+          name: priority
+          required: false
+          schema:
+            type: string
+            example: "u=1, i"
+        - in: header
+          name: sec-ch-ua
+          required: false
+          schema:
+            type: string
+            example: '"Not_A Brand";v="99", "Chromium";v="142"'
+        - in: header
+          name: sec-ch-ua-mobile
+          required: false
+          schema:
+            type: string
+            example: "?0"
+        - in: header
+          name: sec-ch-ua-platform
+          required: false
+          schema:
+            type: string
+            example: '"Windows"'
+        - in: header
+          name: sec-fetch-dest
+          required: false
+          schema:
+            type: string
+            example: "empty"
+        - in: header
+          name: sec-fetch-mode
+          required: false
+          schema:
+            type: string
+            example: "cors"
+        - in: header
+          name: sec-fetch-site
+          required: false
+          schema:
+            type: string
+            example: "cross-site"
+        - in: header
+          name: vscode-sessionid
+          required: false
+          schema:
+            type: string
+            example: "4e1ce15f11f1144aa166492bc11d9c4f08d092ebb8959e23e03c9eee96f76384"
+        - in: header
+          name: x-market-client-id
+          required: false
+          schema:
+            type: string
+            example: "VSCode 1.108.2"
+        - in: header
+          name: x-market-user-id
+          required: false
+          schema:
+            type: string
+            example: "da6d241f-e534-464d-869b-22dcc465488f"
       requestBody:
         required: true
         content:
@@ -142,9 +220,142 @@ paths:
             combination2:
               value: "0.0.13"
               summary: Smart Column Example
+        - in: header
+          name: accept
+          required: false
+          schema:
+            type: string
+            example: "*/*"
+        - in: header
+          name: accept-encoding
+          required: false
+          schema:
+            type: string
+            example: "gzip, deflate, br, zstd"
+        - in: header
+          name: accept-language
+          required: false
+          schema:
+            type: string
+            example: "en-US"
+        - in: header
+          name: connection
+          required: false
+          schema:
+            type: string
+            example: "keep-alive"
+        - in: header
+          name: host
+          required: false
+          schema:
+            type: string
+            example: "jock.gallerycdn.vsassets.io"
+        - in: header
+          name: origin
+          required: false
+          schema:
+            type: string
+            example: "null"
+        - in: header
+          name: sec-ch-ua
+          required: false
+          schema:
+            type: string
+            example: '"Not_A Brand";v="99", "Chromium";v="142"'
+        - in: header
+          name: sec-ch-ua-mobile
+          required: false
+          schema:
+            type: string
+            example: "?0"
+        - in: header
+          name: sec-ch-ua-platform
+          required: false
+          schema:
+            type: string
+            example: '"Windows"'
+        - in: header
+          name: sec-fetch-dest
+          required: false
+          schema:
+            type: string
+            example: "empty"
+        - in: header
+          name: sec-fetch-mode
+          required: false
+          schema:
+            type: string
+            example: "cors"
+        - in: header
+          name: sec-fetch-site
+          required: false
+          schema:
+            type: string
+            example: "cross-site"
+        - in: header
+          name: user-agent
+          required: false
+          schema:
+            type: string
+            example: "VSCode 1.108.2 (Code)"
+        - in: header
+          name: vscode-sessionid
+          required: false
+          schema:
+            type: string
+            example: "4e1ce15f11f1144aa166492bc11d9c4f08d092ebb8959e23e03c9eee96f76384"
+        - in: header
+          name: x-market-client-id
+          required: false
+          schema:
+            type: string
+            example: "VSCode 1.108.2"
+        - in: header
+          name: x-market-user-id
+          required: false
+          schema:
+            type: string
+            example: "da6d241f-e534-464d-869b-22dcc465488f"
       responses:
         '200':
           description: The binary VSIX package payload.
+          headers:
+            access-control-allow-origin:
+              schema:
+                type: string
+            access-control-expose-headers:
+              schema:
+                type: string
+            cache-control:
+              schema:
+                type: string
+            connection:
+              schema:
+                type: string
+            content-length:
+              schema:
+                type: integer
+            date:
+              schema:
+                type: string
+            etag:
+              schema:
+                type: string
+            last-modified:
+              schema:
+                type: string
+            x-ms-blob-type:
+              schema:
+                type: string
+            x-ms-lease-status:
+              schema:
+                type: string
+            x-ms-request-id:
+              schema:
+                type: string
+            x-ms-version:
+              schema:
+                type: string
           content:
             application/zip:
               schema:
@@ -163,6 +374,75 @@ components:
   responses:
     QueryResponse:
       description: Successful query response.
+      headers:
+        access-control-allow-methods:
+          schema:
+            type: string
+            example: "OPTIONS,GET,POST,PATCH,PUT,DELETE"
+        access-control-allow-origin:
+          schema:
+            type: string
+            example: "*"
+        access-control-expose-headers:
+          schema:
+            type: string
+            example: "ActivityId,Request-Context"
+        access-control-max-age:
+          schema:
+            type: integer
+            example: 3600
+        activityid:
+          schema:
+            type: string
+            example: "b7c47f64-f274-44bd-a3c4-5c6877b3af3d"
+        cache-control:
+          schema:
+            type: string
+            example: "no-cache, no-store, must-revalidate"
+        content-encoding:
+          schema:
+            type: string
+            example: "gzip"
+        date:
+          schema:
+            type: string
+            example: "Tue, 17 Mar 2026 13:43:54 GMT"
+        region:
+          schema:
+            type: string
+            example: "EUS2"
+        request-context:
+          schema:
+            type: string
+            example: "appId=cid-v1:8314cee3-137b-4671-85f0-0ebbe0d65ec2"
+        strict-transport-security:
+          schema:
+            type: string
+            example: "max-age=2592000"
+        vary:
+          schema:
+            type: string
+            example: "Accept-Encoding"
+        x-cache:
+          schema:
+            type: string
+            example: "CONFIG_NOCACHE"
+        x-content-type-options:
+          schema:
+            type: string
+            example: "nosniff"
+        x-geo:
+          schema:
+            type: string
+            example: "VSCodeSearchQueryGlobal_ExtensionQuery"
+        x-msedge-ref:
+          schema:
+            type: string
+            example: "Ref A: 8CE394ACA9374C29B4FE1288547A0744 Ref B: TLV231050412060 Ref C: 2026-03-17T13:43:54Z"
+        x-powered-by:
+          schema:
+            type: string
+            example: "ASP.NET"
       content:
         application/json:
           schema:
