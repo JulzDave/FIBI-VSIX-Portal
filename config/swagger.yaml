@@ -521,6 +521,165 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ExtensionManifest'
+  /extensions/{publisher}/{extensionName}/{version}/{timestamp}/Microsoft.VisualStudio.Services.Content.Details:
+    get:
+      summary: Download Extension README (Details Asset)
+      description: |
+        Retrieves the Markdown content of an extension's README file directly from the CDN.
+          - **`publisherSubdomain`** should match the `{publisher}` path parameter.
+      operationId: getExtensionReadme
+      servers:
+        - url: https://{publisherSubdomain}.gallerycdn.vsassets.io
+          variables:
+            publisherSubdomain:
+              default: csharpier
+              description: Matches the {publisher} path parameter.
+      parameters:
+        - in: path
+          name: publisher
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-zA-Z0-9_-]+$'
+            example: "csharpier"
+          description: The publisher name (e.g., csharpier)
+        - in: path
+          name: extensionName
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-zA-Z0-9_-]+$'
+            example: "csharpier-vscode"
+          description: The extension ID (e.g., csharpier-vscode)
+        - in: path
+          name: version
+          required: true
+          schema:
+            type: string
+            pattern: '^\d+\.\d+\.\d+.*$'
+            example: "10.0.1"
+          description: Specific version string (e.g., 10.0.1)
+        - in: path
+          name: timestamp
+          required: true
+          schema:
+            type: string
+            pattern: '^\d+$'
+            example: "1770651028620"
+          description: The Unix epoch timestamp assigned at publication (e.g., 1770651028620). It should be taken from the `extensionquery` response in the `assetUri` property value.
+        - in: header
+          name: accept
+          required: false
+          schema:
+            type: string
+            example: "*/*"
+        - in: header
+          name: accept-encoding
+          required: false
+          schema:
+            type: string
+            example: "gzip, deflate, br, zstd"
+        - in: header
+          name: accept-language
+          required: false
+          schema:
+            type: string
+            example: "en-US"
+        - in: header
+          name: connection
+          required: false
+          schema:
+            type: string
+            example: "keep-alive"
+        - in: header
+          name: origin
+          required: false
+          schema:
+            type: string
+            example: "vscode-file://vscode-app"
+        - in: header
+          name: user-agent
+          required: false
+          schema:
+            type: string
+            example: "VSCode 1.108.2 (Code)"
+        - in: header
+          name: vscode-sessionid
+          required: false
+          schema:
+            type: string
+            example: "4e1ce15f11f1144aa166492bc11d9c4f08d092ebb8959e23e03c9eee96f76384"
+        - in: header
+          name: x-market-client-id
+          required: false
+          schema:
+            type: string
+            example: "VSCode 1.108.2"
+        - in: header
+          name: x-market-user-id
+          required: false
+          schema:
+            type: string
+            format: uuid
+            example: "da6d241f-e534-464d-869b-22dcc465488f"
+      responses:
+        '200':
+          description: The Markdown README content of the extension.
+          headers:
+            access-control-allow-origin:
+              schema:
+                type: string
+                example: "*"
+            access-control-expose-headers:
+              schema:
+                type: string
+                example: "x-ms-request-id,Server,x-ms-version,Content-Type,Content-Encoding,Cache-Control,ETag,Last-Modified,x-ms-lease-status,x-ms-blob-type,Content-Length,Date,Transfer-Encoding"
+            cache-control:
+              schema:
+                type: string
+                example: "public, max-age=31536000"
+            content-length:
+              schema:
+                type: integer
+            date:
+              schema:
+                type: string
+            etag:
+              schema:
+                type: string
+            last-modified:
+              schema:
+                type: string
+                format: date-time
+            vary:
+              schema:
+                type: string
+                example: "Accept-Encoding"
+            x-ms-blob-type:
+              schema:
+                type: string
+                example: "BlockBlob"
+            x-ms-lease-status:
+              schema:
+                type: string
+                example: "unlocked"
+            x-ms-request-id:
+              schema:
+                type: string
+                format: uuid
+            x-ms-version:
+              schema:
+                type: string
+                example: "2009-09-19"
+          content:
+            text/markdown:
+              schema:
+                type: string
+                description: The raw markdown file containing the extension's README content.
+        '404':
+          $ref: '#/components/responses/MarketplaceError'
+        default:
+          $ref: '#/components/responses/MarketplaceError'
 components:
   responses:
     QueryResponse:
