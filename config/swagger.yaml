@@ -141,6 +141,8 @@ paths:
                           value: "Microsoft.VisualStudio.Code"
                       pageNumber: 1
                       pageSize: 20
+                      sortBy: 0
+                      sortOrder: 0
                   assetTypes: []
                   flags: 870
               VersionHistoryExample:
@@ -369,7 +371,156 @@ paths:
           $ref: '#/components/responses/RateLimitError'
         default:
           $ref: '#/components/responses/MarketplaceError'
-
+  /extensions/{publisher}/{extensionName}/{version}/{timestamp}/Microsoft.VisualStudio.Code.Manifest:
+    get:
+      summary: Download Extension Manifest
+      description: |
+        Retrieves the `Microsoft.VisualStudio.Code.Manifest` (`package.json`) from the CDN for a specific extension, version, and build timestamp.
+      operationId: getExtensionManifest
+      servers:
+        - url: https://{publisherSubdomain}.gallerycdn.vsassets.io
+          variables:
+            publisherSubdomain:
+              default: csharpier
+              description: Matches the {publisher} path parameter.
+      parameters:
+        - in: path
+          name: publisher
+          required: true
+          schema:
+            type: string
+            example: "csharpier"
+          description: The publisher name.
+        - in: path
+          name: extensionName
+          required: true
+          schema:
+            type: string
+            example: "csharpier-vscode"
+          description: The extension name/ID.
+        - in: path
+          name: version
+          required: true
+          schema:
+            type: string
+            example: "10.0.1"
+          description: The specific version of the extension.
+        - in: path
+          name: timestamp
+          required: true
+          schema:
+            type: string
+            example: "1770651028620"
+          description: The internal timestamp/build ID of the uploaded package. It should be taken from the `extensionquery` response in the `assetUri` property value.
+        - in: header
+          name: accept
+          required: false
+          schema:
+            type: string
+            default: "*/*"
+        - in: header
+          name: accept-encoding
+          required: false
+          schema:
+            type: string
+            example: "gzip, deflate, br, zstd"
+        - in: header
+          name: accept-language
+          required: false
+          schema:
+            type: string
+            example: "en-US"
+        - in: header
+          name: connection
+          required: false
+          schema:
+            type: string
+            example: "keep-alive"
+        - in: header
+          name: origin
+          required: false
+          schema:
+            type: string
+            example: "vscode-file://vscode-app"
+        - in: header
+          name: user-agent
+          required: false
+          schema:
+            type: string
+            example: "VSCode 1.108.2 (Code)"
+        - in: header
+          name: vscode-sessionid
+          required: false
+          schema:
+            type: string
+            example: "4e1ce15f11f1144aa166492bc11d9c4f08d092ebb8959e23e03c9eee96f76384"
+        - in: header
+          name: x-market-client-id
+          required: false
+          schema:
+            type: string
+            example: "VSCode 1.108.2"
+        - in: header
+          name: x-market-user-id
+          required: false
+          schema:
+            type: string
+            example: "da6d241f-e534-464d-869b-22dcc465488f"
+      responses:
+        '200':
+          description: OK - Returns the extension manifest payload.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                example: "public, max-age=31536000"
+            Content-Length:
+              schema:
+                type: integer
+                example: 1589
+            Content-Encoding:
+              schema:
+                type: string
+                example: "gzip"
+            Last-Modified:
+              schema:
+                type: string
+                example: "Sat, 14 Jun 2025 01:26:49 GMT"
+            ETag:
+              schema:
+                type: string
+                example: "0x8DDAAE2893BCEB1"
+            x-ms-request-id:
+              schema:
+                type: string
+                example: "6306259d-001e-004a-77c3-b6f760000000"
+            x-ms-version:
+              schema:
+                type: string
+                example: "2009-09-19"
+            x-ms-lease-status:
+              schema:
+                type: string
+                example: "unlocked"
+            x-ms-blob-type:
+              schema:
+                type: string
+                example: "BlockBlob"
+            Access-Control-Expose-Headers:
+              schema:
+                type: string
+            Access-Control-Allow-Origin:
+              schema:
+                type: string
+                example: "*"
+            Vary:
+              schema:
+                type: string
+                example: "Accept-Encoding"
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExtensionManifest'
 components:
   responses:
     QueryResponse:
@@ -538,6 +689,8 @@ components:
                 properties:
                   pageNumber: { type: integer, default: 1 }
                   pageSize: { type: integer, default: 20 }
+                  sortBy: { type: integer, default: 0 }
+                  sortOrder: { type: integer, default: 0 }
                   criteria:
                     type: array
                     items:
@@ -730,3 +883,243 @@ components:
           type: string
         count:
           type: integer
+    ExtensionManifest:
+      type: object
+      description: A generic representation of a VS Code extension package.json manifest.
+      required:
+        - name
+        - version
+        - publisher
+        - engines
+      properties:
+        name:
+          type: string
+          description: The internal name of the extension.
+        displayName:
+          type: string
+          description: The display name for the extension used in the Marketplace.
+        description:
+          type: string
+          description: A short description of the extension.
+        version:
+          type: string
+          description: The extension version.
+        publisher:
+          type: string
+          description: The publisher name.
+        license:
+          type: string
+        homepage:
+          type: string
+          format: uri
+        repository:
+          $ref: '#/components/schemas/ManifestRepository'
+        bugs:
+          $ref: '#/components/schemas/ManifestBugs'
+        icon:
+          type: string
+          description: The path to the extension's icon.
+        engines:
+          $ref: '#/components/schemas/ManifestEngines'
+        categories:
+          type: array
+          items:
+            type: string
+        activationEvents:
+          type: array
+          items:
+            type: string
+        main:
+          type: string
+          description: The entry point to the extension.
+        contributes:
+          $ref: '#/components/schemas/ManifestContributes'
+        scripts:
+          type: object
+          description: Key-value map of npm scripts.
+          additionalProperties:
+            type: string
+        devDependencies:
+          type: object
+          description: Key-value map of development dependencies.
+          additionalProperties:
+            type: string
+        dependencies:
+          type: object
+          description: Key-value map of runtime dependencies.
+          additionalProperties:
+            type: string
+      additionalProperties: true
+
+    ManifestBugs:
+      type: object
+      properties:
+        url:
+          type: string
+          format: uri
+        email:
+          type: string
+
+    ManifestEngines:
+      type: object
+      properties:
+        vscode:
+          type: string
+      additionalProperties:
+        type: string
+
+    ManifestRepository:
+      type: object
+      properties:
+        type:
+          type: string
+        url:
+          type: string
+          format: uri
+
+    ManifestContributes:
+      type: object
+      description: All contribution points for the extension (commands, themes, configuration, etc.).
+      properties:
+        languages:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManifestLanguage'
+        grammars:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManifestGrammar'
+        commands:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManifestCommand'
+        keybindings:
+          type: array
+          items:
+            $ref: '#/components/schemas/ManifestKeybinding'
+        menus:
+          $ref: '#/components/schemas/ManifestMenus'
+        configuration:
+          $ref: '#/components/schemas/ManifestConfiguration'
+      additionalProperties: true # Allows for unmapped contributions like themes, snippets, taskDefinitions
+
+    ManifestConfiguration:
+      type: object
+      properties:
+        type:
+          type: string
+        title:
+          type: string
+        properties:
+          type: object
+          description: Dynamic key-value map of configuration settings provided by the extension.
+          additionalProperties:
+            $ref: '#/components/schemas/ManifestConfigurationProperty'
+
+    ManifestConfigurationProperty:
+      type: object
+      properties:
+        type:
+          type: string
+          description: The data type for the configuration (e.g., string, boolean, number, object).
+        default:
+          description: The default value for this configuration.
+          nullable: true
+        description:
+          type: string
+        markdownDescription:
+          type: string
+        enum:
+          type: array
+          items: {}
+        enumDescriptions:
+          type: array
+          items:
+            type: string
+        scope:
+          type: string
+      additionalProperties: true
+
+    ManifestMenus:
+      type: object
+      description: Dynamic mapping of menu insertion points (e.g., editor/context, explorer/context) to actions.
+      additionalProperties:
+        type: array
+        items:
+          $ref: '#/components/schemas/ManifestMenuAction'
+
+    ManifestMenuAction:
+      type: object
+      properties:
+        when:
+          type: string
+          description: Condition expression which must be true to show this item.
+        command:
+          type: string
+          description: Command to execute on click.
+        group:
+          type: string
+          description: Sorting group into which this item belongs.
+        alt:
+          type: string
+          description: Alternate command to run when holding Alt/Option.
+
+    ManifestCommand:
+      type: object
+      properties:
+        command:
+          type: string
+        title:
+          type: string
+        category:
+          type: string
+        enablement:
+          type: string
+        icon:
+          type: object
+          description: Can be a string or an object with light/dark paths.
+          additionalProperties: true
+
+    ManifestLanguage:
+      type: object
+      properties:
+        id:
+          type: string
+        aliases:
+          type: array
+          items:
+            type: string
+        extensions:
+          type: array
+          items:
+            type: string
+        configuration:
+          type: string
+      additionalProperties: true
+
+    ManifestGrammar:
+      type: object
+      properties:
+        language:
+          type: string
+        scopeName:
+          type: string
+        path:
+          type: string
+      additionalProperties: true
+
+    ManifestKeybinding:
+      type: object
+      properties:
+        command:
+          type: string
+        key:
+          type: string
+        mac:
+          type: string
+        win:
+          type: string
+        linux:
+          type: string
+        when:
+          type: string
