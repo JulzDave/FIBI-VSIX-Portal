@@ -364,13 +364,13 @@ paths:
                 type: string
                 format: binary
         '400':
-          $ref: '#/components/responses/MarketplaceError'
+          $ref: '#/components/responses/CdnError'
         '404':
-          $ref: '#/components/responses/MarketplaceError'
+          $ref: '#/components/responses/CdnError'
         '503':
           $ref: '#/components/responses/RateLimitError'
         default:
-          $ref: '#/components/responses/MarketplaceError'
+          $ref: '#/components/responses/CdnError'
   /extensions/{publisher}/{extensionName}/{version}/{timestamp}/Microsoft.VisualStudio.Code.Manifest:
     get:
       summary: Download Extension Manifest
@@ -521,6 +521,12 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ExtensionManifest'
+        '404':
+          $ref: '#/components/responses/CdnError'
+        '503':
+          $ref: '#/components/responses/RateLimitError'
+        default:
+          $ref: '#/components/responses/CdnError'
   /extensions/{publisher}/{extensionName}/{version}/{timestamp}/Microsoft.VisualStudio.Services.Content.Details:
     get:
       summary: Download Extension README (Details Asset)
@@ -677,9 +683,11 @@ paths:
                 type: string
                 description: The raw markdown file containing the extension's README content.
         '404':
-          $ref: '#/components/responses/MarketplaceError'
+          $ref: '#/components/responses/CdnError'
+        '503':
+          $ref: '#/components/responses/RateLimitError'
         default:
-          $ref: '#/components/responses/MarketplaceError'
+          $ref: '#/components/responses/CdnError'
 components:
   responses:
     QueryResponse:
@@ -775,9 +783,43 @@ components:
 
     RateLimitError:
       description: Service Unavailable. The Marketplace is throttling or rejecting the request.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    CdnError:
+      description: Azure Blob Storage error response returned by CDN endpoints (gallerycdn.vsassets.io) when a resource is missing or the request is invalid.
+      content:
+        application/xml:
+          schema:
+            $ref: '#/components/schemas/AzureBlobError'
+          example: |
+            <?xml version="1.0" encoding="utf-8"?>
+            <Error>
+              <Code>BlobNotFound</Code>
+              <Message>The specified blob does not exist.
+            RequestId:e85c08a5-201e-001c-316f-ca3e23000000
+            Time:2026-04-12T11:26:08.8107747Z</Message>
+            </Error>
 
   schemas:
-    # --- Error Schema ---
+    # --- Error Schemas ---
+    AzureBlobError:
+      type: object
+      description: XML error envelope returned by Azure Blob Storage (CDN) when a requested asset does not exist or the request is invalid.
+      xml:
+        name: Error
+      properties:
+        Code:
+          type: string
+          description: Azure storage error code (e.g., BlobNotFound, InvalidUri).
+          example: "BlobNotFound"
+        Message:
+          type: string
+          description: Human-readable error message, including the request ID and timestamp appended by the storage service.
+          example: "The specified blob does not exist.\nRequestId:e85c08a5-201e-001c-316f-ca3e23000000\nTime:2026-04-12T11:26:08.8107747Z"
+
     ErrorResponse:
       type: object
       description: Standard Microsoft VSS WebApi Exception payload.
