@@ -164,6 +164,141 @@ paths:
         default:
           $ref: '#/components/responses/MarketplaceError'
 
+  /_apis/public/gallery/vscode/{publisher}/{extension}/latest:
+    get:
+      operationId: getLatestExtension
+      summary: Get Latest Extension Metadata
+      description: |
+        Returns the full metadata for the latest published version of a specific extension, including version details, file assets, statistics, and publisher information.
+        - Unlike `extensionquery`, the API version is embedded in the `Accept` request header rather than a query parameter.
+        - Responses are publicly cacheable (`cache-control: public, max-age=1200`).
+      parameters:
+        - in: path
+          name: publisher
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-zA-Z0-9_-]+$'
+          description: The publisher name.
+          example: "csharpier"
+        - in: path
+          name: extension
+          required: true
+          schema:
+            type: string
+            pattern: '^[a-zA-Z0-9_-]+$'
+          description: The extension name/ID.
+          example: "csharpier-vscode"
+        - in: header
+          name: accept
+          required: false
+          schema:
+            type: string
+            default: "application/json;api-version=7.2-preview"
+          description: Specifies the desired response format and API version. The API version is embedded here rather than as a query parameter.
+        - in: header
+          name: content-type
+          required: false
+          schema:
+            type: string
+            example: "application/json"
+        - in: header
+          name: accept-encoding
+          required: false
+          schema:
+            type: string
+            example: "gzip, deflate, br, zstd"
+        - in: header
+          name: accept-language
+          required: false
+          schema:
+            type: string
+            example: "en-US"
+        - in: header
+          name: origin
+          required: false
+          schema:
+            type: string
+            example: "vscode-file://vscode-app"
+        - in: header
+          name: priority
+          required: false
+          schema:
+            type: string
+            example: "u=1, i"
+        - in: header
+          name: sec-ch-ua
+          required: false
+          schema:
+            type: string
+            example: '"Not_A Brand";v="99", "Chromium";v="142"'
+        - in: header
+          name: sec-ch-ua-mobile
+          required: false
+          schema:
+            type: string
+            example: "?0"
+        - in: header
+          name: sec-ch-ua-platform
+          required: false
+          schema:
+            type: string
+            example: '"Windows"'
+        - in: header
+          name: sec-fetch-dest
+          required: false
+          schema:
+            type: string
+            example: "empty"
+        - in: header
+          name: sec-fetch-mode
+          required: false
+          schema:
+            type: string
+            example: "cors"
+        - in: header
+          name: sec-fetch-site
+          required: false
+          schema:
+            type: string
+            example: "cross-site"
+        - in: header
+          name: user-agent
+          required: false
+          schema:
+            type: string
+            example: "VSCode 1.108.2 (Code)"
+        - in: header
+          name: vscode-sessionid
+          required: false
+          schema:
+            type: string
+            example: "4e1ce15f11f1144aa166492bc11d9c4f08d092ebb8959e23e03c9eee96f76384"
+        - in: header
+          name: x-market-client-id
+          required: false
+          schema:
+            type: string
+            example: "VSCode 1.108.2"
+        - in: header
+          name: x-market-user-id
+          required: false
+          schema:
+            type: string
+            format: uuid
+            example: "da6d241f-e534-464d-869b-22dcc465488f"
+      responses:
+        '200':
+          $ref: '#/components/responses/LatestExtensionResponse'
+        '400':
+          $ref: '#/components/responses/MarketplaceError'
+        '404':
+          $ref: '#/components/responses/ExtensionNotFoundResponse'
+        '503':
+          $ref: '#/components/responses/RateLimitError'
+        default:
+          $ref: '#/components/responses/MarketplaceError'
+
   /_apis/public/gallery/publisher/{publisher}/extension/{extensionName}/{version}/assetbyname/Microsoft.VisualStudio.Services.VSIXPackage:
     get:
       summary: Download VSIX Package
@@ -765,7 +900,110 @@ components:
         application/json:
           schema:
             $ref: '#/components/schemas/QueryResponseBody'
-            
+
+    LatestExtensionResponse:
+      description: Returns the full metadata for the latest published version of the requested extension.
+      headers:
+        access-control-allow-headers:
+          schema:
+            type: string
+            example: "authorization"
+        access-control-allow-methods:
+          schema:
+            type: string
+            example: "OPTIONS,GET,POST,PATCH,PUT,DELETE"
+        access-control-allow-origin:
+          schema:
+            type: string
+            example: "*"
+        access-control-expose-headers:
+          schema:
+            type: string
+            example: "ActivityId,X-TFS-Session,X-MS-ContinuationToken,X-VSS-GlobalMessage,ETag,Server,X-MSEdge-Ref,X-TFS-ProcessId,X-VSS-E2EID,WWW-Authenticate,Request-Context"
+        access-control-max-age:
+          schema:
+            type: integer
+            example: 3600
+        activityid:
+          schema:
+            type: string
+            example: "e145196d-3e87-4462-b593-35e593c92cac"
+        cache-control:
+          schema:
+            type: string
+            example: "public, max-age=1200, stale-while-revalidate=300, stale-if-error=600"
+        content-encoding:
+          schema:
+            type: string
+            example: "br"
+        date:
+          schema:
+            type: string
+            example: "Sun, 12 Apr 2026 11:41:39 GMT"
+        p3p:
+          schema:
+            type: string
+            example: 'CP="CAO DSP COR ADMa DEV CONo TELo CUR PSA PSD TAI IVDo OUR SAMi BUS DEM NAV STA UNI COM INT PHY ONL FIN PUR LOC CNT"'
+        request-context:
+          schema:
+            type: string
+            example: "appId=cid-v1:84715e31-583a-4723-a46d-946169b2f4a8"
+        strict-transport-security:
+          schema:
+            type: string
+            example: "max-age=31536000; includeSubDomains"
+        x-cache:
+          schema:
+            type: string
+            example: "TCP_HIT"
+        x-ccc:
+          schema:
+            type: string
+            example: "IL"
+        x-cid:
+          schema:
+            type: string
+            example: "7"
+        x-content-type-options:
+          schema:
+            type: string
+            example: "nosniff"
+        x-msedge-ref:
+          schema:
+            type: string
+            example: "Ref A: 47FE87905FBC4120889BD53EBF5EBA02 Ref B: TLV231050410036 Ref C: 2026-04-12T11:41:40Z"
+        x-tfs-processid:
+          schema:
+            type: string
+            example: "8ad15cb4-1c69-45cd-bf6b-d2005942dd50"
+        x-tfs-session:
+          schema:
+            type: string
+            example: "e145196d-3e87-4462-b593-35e593c92cac"
+        x-vss-e2eid:
+          schema:
+            type: string
+            example: "e145196d-3e87-4462-b593-35e593c92cac"
+        x-vss-senderdeploymentid:
+          schema:
+            type: string
+            example: "2663b13f-50e3-a655-a159-22f6f4725fab"
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Extension'
+
+    ExtensionNotFoundResponse:
+      description: The requested extension does not exist in the Marketplace.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ExtensionNotFoundError'
+          example:
+            count: 1
+            value:
+              Message: "The requested extension 'csharpiers.csharpier-vscode' doesn't exist."
+
     MarketplaceError:
       description: Standardized error response for bad requests, missing resources, or generic failures.
       content:
@@ -805,6 +1043,20 @@ components:
 
   schemas:
     # --- Error Schemas ---
+    ExtensionNotFoundError:
+      type: object
+      description: Error envelope returned by the `/vscode/{publisher}/{extension}/latest` endpoint when the requested extension does not exist.
+      properties:
+        count:
+          type: integer
+          example: 1
+        value:
+          type: object
+          properties:
+            Message:
+              type: string
+              example: "The requested extension 'csharpiers.csharpier-vscode' doesn't exist."
+
     AzureBlobError:
       type: object
       description: XML error envelope returned by Azure Blob Storage (CDN) when a requested asset does not exist or the request is invalid.
